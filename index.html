@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git Cheat Sheet</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .header h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff, #f0f0f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.2rem;
+      font-weight: 300;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 1.5rem;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+      background-size: 300% 100%;
+      animation: gradientShift 3s ease infinite;
+    }
+
+    .card-header {
+      padding: 1.5rem;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background-color 0.2s ease;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .card-header::after {
+      content: attr(data-preview);
+      position: absolute;
+      bottom: -2rem;
+      left: 1.5rem;
+      right: 1.5rem;
+      font-size: 0.85rem;
+      color: #718096;
+      opacity: 0;
+      transition: all 0.3s ease;
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card:not([open]) .card-header::after {
+      opacity: 1;
+      bottom: -1rem;
+    }
+
+    .card-header:hover {
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .emoji {
+      font-size: 1.5rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+
+    .chevron {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #667eea;
+    }
+
+    .card[open] .chevron {
+      transform: rotate(180deg);
+    }
+
+    .card-content {
+      padding: 0 1.5rem 1.5rem;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card[open] .card-content {
+      opacity: 1;
+      max-height: 1000px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    pre {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #e2e8f0;
+      padding: 1.5rem;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    pre::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 12px 12px 0 0;
+    }
+
+    code {
+      color: #e2e8f0;
+    }
+
+    /* Syntax highlighting */
+    .command { color: #81c784; }
+    .flag { color: #ffb74d; }
+    .comment { color: #78909c; font-style: italic; }
+    .string { color: #f48fb1; }
+
+    .search-container {
+      margin-bottom: 2rem;
+      position: relative;
+      animation: fadeInDown 0.8s ease-out 0.1s both;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus {
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667eea;
+      font-size: 1.2rem;
+    }
+
+    .expand-all {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: rgba(255,255,255,0.8);
+      animation: fadeIn 1s ease-out 0.5s both;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .header h1 { font-size: 2.5rem; }
+      .grid { grid-template-columns: 1fr; }
+      pre { font-size: 0.8rem; padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 Git Cheat Sheet</h1>
+      <p>Your comprehensive guide to Git commands</p>
+    </div>
+
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-box" placeholder="Search commands, descriptions, or categories..." id="searchInput">
+    </div>
+
+    <div class="expand-all">
+      <button class="btn" onclick="toggleAll()">Expand All</button>
+    </div>
+
+    <div class="grid">
+      <details class="card" open data-category="basic github flow initialization">
+        <summary class="card-header" data-preview="git init • git add . • git commit -m">
+          <span class="card-title">
+            <span class="emoji">🔰</span>
+            Basic GitHub Flow
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git init</span>                                <span class="comment"># Initialize a new Git repository</span>
+<span class="command">git remote add origin</span> <span class="string">&lt;url&gt;</span>             <span class="comment"># Add remote repository</span>
+<span class="command">git pull origin main</span> <span class="flag">--allow-unrelated-histories</span>   <span class="comment"># Pull latest code (even if unrelated histories)</span>
+<span class="command">git checkout</span> <span class="flag">-b</span> <span class="string">feature-branch</span>          <span class="comment"># Create & switch to a new branch</span>
+<span class="command">git add .</span>                               <span class="comment"># Stage all changes</span>
+<span class="command">git commit</span> <span class="flag">-m</span> <span class="string">"Your commit message"</span>     <span class="comment"># Commit staged changes with a message</span>
+<span class="command">git push</span> <span class="flag">-u</span> <span class="string">origin feature-branch</span>       <span class="comment"># Push branch to remote & set upstream</span></code></pre>
+        </div>
+      </details>
+
+      <details class="card" data-category="remote management url origin upstream">
+        <summary class="card-header" data-preview="git remote -v • git remote set-url • git fetch">
+          <span class="card-title">
+            <span class="emoji">🔧</span>
+            Remote Management
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git remote</span> <span class="flag">-v</span>                           <span class="comment"># List all remotes with their URLs</span>
+<span class="command">git remote set-url origin</span> <span class="string">&lt;url&gt;</span>         <span class="comment"># Change remote URL for 'origin'</span>
+<span class="command">git remote rename origin upstream</span>       <span class="comment"># Rename remote from origin → upstream</span>
+<span class="command">git remote remove origin</span>                <span class="comment"># Remove the remote named origin</span>
+<span class="command">git remote add origin</span> <span class="string">&lt;url&gt;</span>             <span class="comment"># Add a new remote called origin</span>
+<span class="command">git fetch</span> <span class="flag">--prune</span>                       <span class="comment"># Remove local references to deleted remote branches</span>
+<span class="command">git remote get-url origin</span>               <span class="comment"># Show the URL of the remote origin</span></code></pre>
+        </div>
+      </details>
+
+      <details class="card" data-category="branching merging branch delete merge checkout">
+        <summary class="card-header" data-preview="git branch -d • git checkout -b • git merge">
+          <span class="card-title">
+            <span class="emoji">🛠️</span>
+            Branching & Merging
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git branch</span> <span class="flag">-d</span> <span class="string">branch_name</span>               <span class="comment"># Delete a branch safely (won't delete if unmerged)</span>
+<span class="command">git branch</span> <span class="flag">-D</span> <span class="string">branch_name</span>               <span class="comment"># Force delete branch even if unmerged</span>
+<span class="command">git push origin</span> <span class="flag">--delete</span> <span class="string">branch_name</span>    <span class="comment"># Delete branch from remote</span>
+<span class="command">git checkout</span> <span class="flag">-b</span> <span class="string">new_branch</span>              <span class="comment"># Create a new branch and switch to it</span>
+<span class="command">git merge</span> <span class="string">branch_name</span>                   <span class="comment"># Merge specified branch into current branch</span>
+<span class="command">git pull origin main</span> <span class="flag">--allow-unrelated-histories</span>   <span class="comment"># Merge histories that are unrelated</span></code></pre>
+        </div>
+      </details>
+
+      <details class="card" data-category="commit management amend rebase cherry-pick reset revert">
+        <summary class="card-header" data-preview="git commit --amend • git rebase -i • git reset">
+          <span class="card-title">
+            <span class="emoji">✨</span>
+            Commit Management
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git commit</span> <span class="flag">--amend</span> <span class="flag">-m</span> <span class="string">"New message"</span>     <span class="comment"># Edit last commit (message or content)</span>
+<span class="command">git rebase</span> <span class="flag">-i</span> <span class="string">HEAD~3</span>                    <span class="comment"># Interactive rebase (squash, reorder last 3 commits)</span>
+<span class="command">git cherry-pick</span> <span class="string">&lt;commit_hash&gt;</span>           <span class="comment"># Apply specific commit from another branch</span>
+<span class="command">git reset</span> <span class="flag">--soft</span> <span class="string">HEAD~1</span>                 <span class="comment"># Undo last commit but keep changes staged</span>
+<span class="command">git reset</span> <span class="flag">--hard</span> <span class="string">HEAD~1</span>                 <span class="comment"># Undo last commit and discard changes</span>
+<span class="command">git revert</span> <span class="string">&lt;commit_hash&gt;</span>                <span class="comment"># Create a new commit that undoes changes from given commit</span></code></pre>
+        </div>
+      </details>
+
+      <details class="card" data-category="debugging recovery reflog bisect bug troubleshooting">
+        <summary class="card-header" data-preview="git reflog • git bisect start • git bisect good">
+          <span class="card-title">
+            <span class="emoji">🎯</span>
+            Debugging & Recovery
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git reflog</span>                              <span class="comment"># Show history of all branch HEAD changes (recover lost commits)</span>
+<span class="command">git bisect start</span>                        <span class="comment"># Start binary search debugging to find buggy commit</span>
+<span class="command">git bisect good</span> <span class="string">&lt;commit&gt;</span>                <span class="comment"># Mark a commit as good (no bug)</span>
+<span class="command">git bisect bad</span>                          <span class="comment"># Mark current commit as bad (contains bug)</span></code></pre>
+        </div>
+      </details>
+
+      <details class="card" data-category="stash cleanup temporary save untracked clean">
+        <summary class="card-header" data-preview="git stash • git stash pop • git clean -f">
+          <span class="card-title">
+            <span class="emoji">📦</span>
+            Stash & Cleanup
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git stash</span>                               <span class="comment"># Save uncommitted changes for later use</span>
+<span class="command">git stash list</span>                          <span class="comment"># Show list of saved stashes</span>
+<span class="command">git stash pop</span>                           <span class="comment"># Apply last stash and remove it from stash list</span>
+<span class="command">git clean</span> <span class="flag">-f</span>                            <span class="comment"># Delete untracked files</span>
+<span class="command">git clean</span> <span class="flag">-fd</span>                           <span class="comment"># Delete untracked files and directories</span>
+<span class="command">git clean</span> <span class="flag">-fx</span>                           <span class="comment"># Delete ignored + untracked files</span></code></pre>
+        </div>
+      </details>
+
+      <details class="card" data-category="worktrees sparse checkout multiple directories">
+        <summary class="card-header" data-preview="git worktree add • git sparse-checkout init">
+          <span class="card-title">
+            <span class="emoji">🧑‍💻</span>
+            Worktrees & Sparse Checkout
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git worktree add</span> <span class="string">../dir branch_name</span>     <span class="comment"># Create an additional working directory for a branch</span>
+<span class="command">git sparse-checkout init</span> <span class="flag">--cone</span>         <span class="comment"># Initialize sparse checkout mode</span>
+<span class="command">git sparse-checkout set</span> <span class="string">path/to/folder</span>  <span class="comment"># Checkout only specific folder(s)</span></code></pre>
+        </div>
+      </details>
+
+      <details class="card" data-category="tagging releases version tag annotated push">
+        <summary class="card-header" data-preview="git tag -a v1.0 • git push origin v1.0">
+          <span class="card-title">
+            <span class="emoji">🏷️</span>
+            Tagging & Releases
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6,9 12,15 18,9"></polyline>
+          </svg>
+        </summary>
+        <div class="card-content">
+          <pre><code><span class="command">git tag</span> <span class="flag">-a</span> <span class="string">v1.0</span> <span class="flag">-m</span> <span class="string">"Release 1.0"</span>        <span class="comment"># Create annotated tag named v1.0</span>
+<span class="command">git push origin</span> <span class="string">v1.0</span>                    <span class="comment"># Push tag v1.0 to remote</span></code></pre>
+        </div>
+      </details>
+    </div>
+
+    <div class="footer">
+      <p>💡 Tip: Use the search bar to quickly find specific commands</p>
+    </div>
+  </div>
+
+  <script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const cards = document.querySelectorAll('.card');
+
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      
+      cards.forEach(card => {
+        const category = card.dataset.category;
+        const content = card.textContent.toLowerCase();
+        
+        if (searchTerm === '' || category.includes(searchTerm) || content.includes(searchTerm)) {
+          card.classList.remove('hidden');
+          // Auto-expand matching cards when searching
+          if (searchTerm !== '') {
+            card.setAttribute('open', '');
+          }
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+
+    // Toggle all functionality
+    let allExpanded = true;
+    function toggleAll() {
+      const btn = document.querySelector('.btn');
+      
+      if (allExpanded) {
+        cards.forEach(card => {
+          if (!card.classList.contains('hidden')) {
+            card.removeAttribute('open');
+          }
+        });
+        btn.textContent = 'Expand All';
+        allExpanded = false;
+      } else {
+        cards.forEach(card => {
+          if (!card.classList.contains('hidden')) {
+            card.setAttribute('open', '');
+          }
+        });
+        btn.textContent = 'Collapse All';
+        allExpanded = true;
+      }
+    }
+
+    // Smooth scroll to cards when search matches
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const firstVisibleCard = document.querySelector('.card:not(.hidden)');
+        if (firstVisibleCard) {
+          firstVisibleCard.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }
+    });
+
+    // Add copy functionality to code blocks
+    document.querySelectorAll('pre').forEach(pre => {
+      pre.addEventListener('click', function() {
+        const code = this.textContent;
+        navigator.clipboard.writeText(code).then(() => {
+          // Visual feedback
+          const originalBg = this.style.background;
+          this.style.background = 'linear-gradient(135deg, #1a4d3a, #2d5a3d)';
+          setTimeout(() => {
+            this.style.background = originalBg;
+          }, 200);
+        });
+      });
+      
+      // Add cursor pointer to indicate clickability
+      pre.style.cursor = 'pointer';
+      pre.title = 'Click to copy';
+    });
+  </script>
+</body>
+</html>
