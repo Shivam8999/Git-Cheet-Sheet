@@ -2,7 +2,7 @@
 # 📝 Git Cheat Sheet  
 
 ## Deployed URL
-`https://github.com/Shivam8999/Git-Cheet-Sheet/deployments/github-pages`
+[https://github.com/Shivam8999/Git-Cheet-Sheet/deployments/github-pages](https://shivam8999.github.io/Git-Cheet-Sheet/)
 
 ## 🔰 Basic GitHub Flow  
 
